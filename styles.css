@@ -868,15 +868,6 @@ h2 {
   gap: 12px;
 }
 
-.comments-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-  background: #fbfcfd;
-}
-
 .primary-button,
 .secondary-button {
   min-height: 38px;
@@ -899,6 +890,11 @@ h2 {
   border-color: #2a3036;
 }
 
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 .secondary-button {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -907,19 +903,6 @@ h2 {
 
 .secondary-button:hover {
   border-color: var(--border-strong);
-}
-
-.empty-comment-state {
-  margin: 18px 20px 20px;
-  min-height: 120px;
-  display: grid;
-  place-items: center;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
-  color: var(--muted);
-  text-align: center;
-  padding: 24px;
-  line-height: 1.45;
 }
 
 .modal-backdrop {
@@ -985,9 +968,25 @@ h2 {
 
 .modal-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 10px;
   padding-top: 6px;
+}
+
+.form-status {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.form-status[data-type="success"] {
+  color: #08713a;
+}
+
+.form-status[data-type="error"] {
+  color: var(--accent-dark);
 }
 
 @media (max-width: 1120px) {
@@ -1013,7 +1012,6 @@ h2 {
   }
 
   .topbar-actions,
-  .comments-actions,
   .modal-actions {
     justify-content: flex-start;
   }
