@@ -5,7 +5,7 @@ const state = {
   query: "",
 };
 
-const FEEDBACK_REPO = "https://github.com/timaskar/colors-token-diff/issues/new";
+const COMMENT_STORAGE_KEY = "colors-token-review-comments:v1";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -293,6 +293,59 @@ function renderAudit() {
   return section("Проверка документации", table(["Статус", "Тезис", "Сверка"], rows), `${auditItems().length}`);
 }
 
+function loadComments() {
+  try {
+    return JSON.parse(localStorage.getItem(COMMENT_STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveComments(comments) {
+  localStorage.setItem(COMMENT_STORAGE_KEY, JSON.stringify(comments, null, 2));
+}
+
+function renderComments() {
+  const comments = loadComments().filter((item) => matchesText([
+    item.token,
+    item.type,
+    item.comment,
+    item.expected,
+    item.reason,
+    item.view,
+    item.query,
+  ].join(" ")));
+
+  const actions = `
+    <div class="comments-actions">
+      <button class="secondary-button" id="copyComments" type="button">Скопировать JSON</button>
+      <button class="primary-button" id="downloadComments" type="button">Скачать JSON</button>
+    </div>
+  `;
+
+  const rows = comments.map((item) => `
+    <tr>
+      <td>
+        <strong>${escapeHtml(item.token)}</strong>
+        <span class="path-line">${escapeHtml(item.type)}</span>
+      </td>
+      <td>${escapeHtml(item.comment)}</td>
+      <td>${escapeHtml(item.expected || "—")}</td>
+      <td>
+        <span class="path-line">${escapeHtml(item.view)}</span>
+        ${item.query ? `<span class="path-line">Поиск: ${escapeHtml(item.query)}</span>` : ""}
+        <span class="path-line">${new Date(item.createdAt).toLocaleString("ru-RU")}</span>
+      </td>
+    </tr>
+  `).join("");
+
+  const hint = comments.length
+    ? ""
+    : `<div class="empty-comment-state">Пока комментариев нет. Нажмите “Сообщить про цвет”, чтобы сохранить первое замечание в этом браузере.</div>`;
+
+  return `${actions}${section("Локальные комментарии по цветам", table(["Что проверить", "Комментарий", "Как должно быть", "Контекст"], rows), `${comments.length}`)}${hint}`;
+}
+
 function table(headers, rows) {
   return `
     <div class="variable-table-wrap">
@@ -310,6 +363,7 @@ const views = [
   { id: "semantic", title: "Semantic", count: () => semanticRows().length, render: renderSemantic },
   { id: "folders", title: "Папки", count: () => 2, render: renderFolders },
   { id: "disappeared", title: "Исчезло", count: () => DATA.primitiveMigration.discarded.length + DATA.comparison.removed.length, render: renderDisappeared },
+  { id: "comments", title: "Комментарии", count: () => loadComments().length, render: renderComments },
   { id: "audit", title: "Проверка", count: () => auditItems().length, render: renderAudit },
 ];
 
@@ -335,10 +389,11 @@ function renderContent() {
       ? "Базовая палитра и все semantic-токены, которые используют каждый primitive."
       : view.id === "primitiveMigration"
         ? "Какие старые Hex + alpha стали primitives, какие схлопнули, какие откинули."
-        : "";
+        : view.id === "comments"
+          ? "Локальные замечания дизайнеров по цветам и токенам. Можно выгрузить JSON-файл."
+          : "";
   $("#resultCount").textContent = `${view.count()} шт.`;
   $("#content").innerHTML = view.render();
-  updateFeedbackLink();
 }
 
 function render() {
@@ -346,34 +401,43 @@ function render() {
   renderContent();
 }
 
-function updateFeedbackLink() {
-  const link = $("#feedbackLink");
-  if (!link) return;
+function openFeedbackModal() {
+  const modal = $("#feedbackModal");
+  const tokenInput = $("#feedbackToken");
+  modal.hidden = false;
+  tokenInput.value = state.query;
+  tokenInput.focus();
+}
+
+function closeFeedbackModal() {
+  $("#feedbackModal").hidden = true;
+  $("#feedbackForm").reset();
+}
+
+function createComment(formData) {
   const view = currentView();
-  const pageUrl = new URL(window.location.href);
-  const params = new URLSearchParams({
-    labels: "color-review",
-    title: `[color] ${view.title}: `,
-    body: [
-      "## Что не так с цветом или токеном?",
-      "",
-      "<!-- Например: цвет пропал, неверно схлопнулся, использует не тот primitive, неверная semantic-папка, не хватает Black/75 и т.п. -->",
-      "",
-      "## Какой токен / primitive / Hex проверить?",
-      "",
-      "- Текущий раздел: " + view.title,
-      state.query ? `- Поиск на момент комментария: ${state.query}` : "",
-      "- Ссылка на место: " + pageUrl.toString(),
-      "",
-      "## Как должно быть?",
-      "",
-      "<!-- Какой primitive или semantic-токен должен использоваться? Что должно сохраниться? -->",
-      "",
-      "## Почему это важно?",
-      "",
-    ].filter(Boolean).join("\n"),
-  });
-  link.href = `${FEEDBACK_REPO}?${params.toString()}`;
+  return {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    createdAt: new Date().toISOString(),
+    view: view.title,
+    query: state.query,
+    url: window.location.href,
+    token: formData.get("token").trim(),
+    type: formData.get("type"),
+    comment: formData.get("comment").trim(),
+    expected: formData.get("expected").trim(),
+    reason: formData.get("reason").trim(),
+  };
+}
+
+function exportComments() {
+  const blob = new Blob([JSON.stringify(loadComments(), null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "colors-token-comments.json";
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 $("#search").addEventListener("input", (event) => {
@@ -389,6 +453,32 @@ $("#tabs").addEventListener("click", (event) => {
   url.searchParams.set("view", state.view);
   window.history.replaceState(null, "", url);
   render();
+});
+
+$("#feedbackButton").addEventListener("click", openFeedbackModal);
+$("#closeFeedback").addEventListener("click", closeFeedbackModal);
+$("#cancelFeedback").addEventListener("click", closeFeedbackModal);
+$("#feedbackModal").addEventListener("click", (event) => {
+  if (event.target.id === "feedbackModal") closeFeedbackModal();
+});
+
+$("#feedbackForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const comment = createComment(new FormData(event.currentTarget));
+  saveComments([comment, ...loadComments()]);
+  closeFeedbackModal();
+  state.view = "comments";
+  const url = new URL(window.location.href);
+  url.searchParams.set("view", state.view);
+  window.history.replaceState(null, "", url);
+  render();
+});
+
+$("#content").addEventListener("click", async (event) => {
+  if (event.target.id === "downloadComments") exportComments();
+  if (event.target.id === "copyComments") {
+    await navigator.clipboard?.writeText(JSON.stringify(loadComments(), null, 2));
+  }
 });
 
 $("#copySummary").addEventListener("click", async () => {

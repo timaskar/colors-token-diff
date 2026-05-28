@@ -14,7 +14,7 @@
           <p>Переезд Colors в систему Primitives + Semantic</p>
         </div>
         <div class="topbar-actions">
-          <a class="feedback-link" id="feedbackLink" href="https://github.com/timaskar/colors-token-diff/issues/new" target="_blank" rel="noreferrer">Сообщить про цвет</a>
+          <button class="feedback-link" id="feedbackButton" type="button">Сообщить про цвет</button>
           <button class="icon-button" id="copySummary" title="Скопировать сводку" aria-label="Скопировать сводку">
             <span aria-hidden="true">⧉</span>
           </button>
@@ -44,6 +44,55 @@
         </section>
       </section>
     </main>
+
+    <div class="modal-backdrop" id="feedbackModal" hidden>
+      <form class="feedback-modal" id="feedbackForm">
+        <div class="modal-head">
+          <div>
+            <h2>Комментарий по цвету</h2>
+            <p>Сохранится локально в этом браузере. Потом можно выгрузить все комментарии JSON-файлом.</p>
+          </div>
+          <button class="icon-button" id="closeFeedback" type="button" aria-label="Закрыть">×</button>
+        </div>
+
+        <label>
+          Токен, primitive или Hex
+          <input id="feedbackToken" name="token" type="text" placeholder="Например: Black/75, #000000 / 75%, Text&Icons/Secondary" required />
+        </label>
+
+        <label>
+          Что проверить
+          <select id="feedbackType" name="type">
+            <option>Цвет пропал</option>
+            <option>Неверный primitive</option>
+            <option>Неверная semantic-папка</option>
+            <option>Неверно схлопнули значение</option>
+            <option>Неиспользуемый primitive</option>
+            <option>Другое</option>
+          </select>
+        </label>
+
+        <label>
+          Комментарий
+          <textarea id="feedbackComment" name="comment" rows="4" placeholder="Что именно смущает?" required></textarea>
+        </label>
+
+        <label>
+          Как должно быть
+          <textarea id="feedbackExpected" name="expected" rows="3" placeholder="Какой primitive/semantic должен использоваться?"></textarea>
+        </label>
+
+        <label>
+          Почему важно
+          <textarea id="feedbackReason" name="reason" rows="2" placeholder="Контекст использования, риск, экран, компонент"></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button class="secondary-button" id="cancelFeedback" type="button">Отмена</button>
+          <button class="primary-button" type="submit">Сохранить комментарий</button>
+        </div>
+      </form>
+    </div>
 
     <script src="./token-diff-data.js"></script>
     <script src="./app.js"></script>
