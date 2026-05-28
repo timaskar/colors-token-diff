@@ -1,19 +1,21 @@
 ---
-name: Design feedback
-about: Leave a comment or proposed correction for the colors token dashboard
-title: "[feedback] "
-labels: design-feedback
+name: Color token review
+about: Report a color/token migration issue or proposed correction
+title: "[color] "
+labels: color-review
 assignees: ""
 ---
 
-## Комментарий
+## Что не так с цветом или токеном?
 
-<!-- Что смущает, что непонятно или что стоит проверить? -->
+<!-- Например: цвет пропал, неверно схлопнулся, использует не тот primitive, неверная semantic-папка, не хватает Black/75 и т.п. -->
 
-## Где увидели
+## Какой токен / primitive / Hex проверить?
 
 <!-- Раздел, токен, primitive, Hex или ссылка из дашборда -->
 
-## Что ожидалось
+## Как должно быть?
 
-## Что исправить / проверить
+<!-- Какой primitive или semantic-токен должен использоваться? Что должно сохраниться? -->
+
+## Почему это важно?
