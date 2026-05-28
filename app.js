@@ -5,8 +5,6 @@ const state = {
   query: "",
 };
 
-const FEEDBACK_ENDPOINT = "https://formsubmit.co/ajax/tim.askar@yandex.ru";
-
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -345,59 +343,6 @@ function render() {
   renderContent();
 }
 
-function openFeedbackModal() {
-  const modal = $("#feedbackModal");
-  const tokenInput = $("#feedbackToken");
-  modal.hidden = false;
-  tokenInput.value = state.query;
-  tokenInput.focus();
-}
-
-function closeFeedbackModal() {
-  $("#feedbackModal").hidden = true;
-  $("#feedbackForm").reset();
-  setFeedbackStatus("");
-}
-
-function setFeedbackStatus(message, type = "") {
-  const status = $("#feedbackStatus");
-  status.textContent = message;
-  status.dataset.type = type;
-}
-
-function createFeedbackPayload(formData) {
-  const view = currentView();
-  return {
-    _subject: `Colors feedback: ${formData.get("token").trim() || "без токена"}`,
-    _template: "table",
-    _captcha: "false",
-    "Кто пишет": formData.get("author").trim() || "Не указано",
-    "Что проверить": formData.get("type"),
-    "Токен / primitive / Hex": formData.get("token").trim(),
-    "Комментарий": formData.get("comment").trim(),
-    "Как должно быть": formData.get("expected").trim() || "Не указано",
-    "Почему важно": formData.get("reason").trim() || "Не указано",
-    "Раздел дашборда": view.title,
-    "Поиск на момент комментария": state.query || "Пусто",
-    "Ссылка": window.location.href,
-    "Дата": new Date().toLocaleString("ru-RU"),
-  };
-}
-
-async function sendFeedback(form) {
-  const response = await fetch(FEEDBACK_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    body: JSON.stringify(createFeedbackPayload(new FormData(form))),
-  });
-
-  if (!response.ok) throw new Error("Feedback request failed");
-  return response.json();
-}
-
 $("#search").addEventListener("input", (event) => {
   state.query = event.target.value.trim();
   renderContent();
@@ -411,33 +356,6 @@ $("#tabs").addEventListener("click", (event) => {
   url.searchParams.set("view", state.view);
   window.history.replaceState(null, "", url);
   render();
-});
-
-$("#feedbackButton").addEventListener("click", openFeedbackModal);
-$("#closeFeedback").addEventListener("click", closeFeedbackModal);
-$("#cancelFeedback").addEventListener("click", closeFeedbackModal);
-$("#feedbackModal").addEventListener("click", (event) => {
-  if (event.target.id === "feedbackModal") closeFeedbackModal();
-});
-
-$("#feedbackForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const submit = $("#submitFeedback");
-  submit.disabled = true;
-  setFeedbackStatus("Отправляю...");
-
-  sendFeedback(form)
-    .then(() => {
-      setFeedbackStatus("Отправлено", "success");
-      window.setTimeout(closeFeedbackModal, 700);
-    })
-    .catch(() => {
-      setFeedbackStatus("Не отправилось. Попробуйте еще раз.", "error");
-    })
-    .finally(() => {
-      submit.disabled = false;
-    });
 });
 
 $("#copySummary").addEventListener("click", async () => {
