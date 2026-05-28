@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Colors Token Diff</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Colors Token Diff</h1>
+          <p>Переезд Colors в систему Primitives + Semantic</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button" id="copySummary" title="Скопировать сводку" aria-label="Скопировать сводку">
+            <span aria-hidden="true">⧉</span>
+          </button>
+          <a class="download-link" href="./token-diff-data.json" download>JSON</a>
+        </div>
+      </header>
+
+      <section class="search-hero">
+        <label for="search">Найти цвет, токен, primitive, Hex или CSS var</label>
+        <input id="search" type="search" placeholder="Например: Black/100, #000000, Secondary, --depot-color-text-primary" />
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar">
+          <nav class="tabs" id="tabs" aria-label="Разделы сравнения"></nav>
+        </aside>
+
+        <section class="content">
+          <div class="content-header">
+            <div>
+              <h2 id="viewTitle"></h2>
+              <p id="viewDescription"></p>
+            </div>
+            <div class="result-count" id="resultCount"></div>
+          </div>
+          <div id="content"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./token-diff-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
