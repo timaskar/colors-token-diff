@@ -98,7 +98,8 @@ h1 {
 }
 
 .icon-button,
-.download-link {
+.download-link,
+.feedback-link {
   height: 38px;
   min-width: 38px;
   display: inline-flex;
@@ -112,15 +113,28 @@ h1 {
   cursor: pointer;
 }
 
-.download-link {
+.download-link,
+.feedback-link {
   padding: 0 14px;
   font-size: 13px;
   font-weight: 700;
 }
 
+.feedback-link {
+  background: var(--text);
+  color: #fff;
+  border-color: var(--text);
+}
+
 .icon-button:hover,
-.download-link:hover {
+.download-link:hover,
+.feedback-link:hover {
   border-color: var(--border-strong);
+}
+
+.feedback-link:hover {
+  background: #2a3036;
+  border-color: #2a3036;
 }
 
 .summary-grid {

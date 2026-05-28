@@ -5,6 +5,8 @@ const state = {
   query: "",
 };
 
+const FEEDBACK_REPO = "https://github.com/timaskar/colors-token-diff/issues/new";
+
 const $ = (selector) => document.querySelector(selector);
 
 function escapeHtml(value) {
@@ -336,11 +338,39 @@ function renderContent() {
         : "";
   $("#resultCount").textContent = `${view.count()} шт.`;
   $("#content").innerHTML = view.render();
+  updateFeedbackLink();
 }
 
 function render() {
   renderTabs();
   renderContent();
+}
+
+function updateFeedbackLink() {
+  const link = $("#feedbackLink");
+  if (!link) return;
+  const view = currentView();
+  const pageUrl = new URL(window.location.href);
+  const params = new URLSearchParams({
+    labels: "design-feedback",
+    title: `[feedback] ${view.title}`,
+    body: [
+      "## Комментарий",
+      "",
+      "<!-- Напишите, что смущает, что непонятно или что стоит проверить. -->",
+      "",
+      "## Контекст",
+      `- Раздел: ${view.title}`,
+      `- URL: ${pageUrl.toString()}`,
+      state.query ? `- Поиск: ${state.query}` : "",
+      "",
+      "## Что ожидалось",
+      "",
+      "## Что исправить / проверить",
+      "",
+    ].filter(Boolean).join("\n"),
+  });
+  link.href = `${FEEDBACK_REPO}?${params.toString()}`;
 }
 
 $("#search").addEventListener("input", (event) => {
